@@ -1,95 +1,76 @@
+@Library(['promebuilder', 'offconda'])_
+
+
 pipeline {
   agent any
-  environment {
-    CONDAENV = calc_conda_env()
-    SOURCELABEL = 'pytho'
-    TARGET = 'C:\\CONDAOFFLINE'
-  }
   parameters {
-    string(name: 'COLOR', defaultValue: 'PYTHO_0402', description: 'Version name of the whole solution')
-    string(name: 'COMPONENTS', defaultValue: 'pytho==4.2 gsf_datamanagement==4.1.2 gsf==4.1.2', description: 'Final packages and their version')
+    string(
+        name: 'NUANCE',
+        defaultValue: 'PYTHO_XXYY',
+        description: 'Version name of the whole solution'
+    )
+    string(
+        name: 'COMPONENTS',
+        defaultValue: 'pytho==4.2.1 gsf==4.2.2 gsf_datamanagement==4.2.2 ratingpro==3.3.1 pytho_docs==4.2.1',
+        description: 'Final packages and their version'
+    )
+    string(
+        name: 'LABEL',
+        defaultValue: 'pytho',
+        description: 'Source channel'
+    )
+    string(
+        name: 'TARGET',
+        defaultValue: 'C:\\CONDAOFFLINE',
+        description: 'Target offline repository'
+    )
+  }
+  environment {
+    CONDAENV = "${env.JOB_NAME}_${env.BUILD_NUMBER}".replace('%2F','_').replace('/', '_')
   }
   stages {
-    stage('SetUp') {
+    stage('Bootstrap') {
       steps {
+        echo "NB: The packages should be PRIVATE o PUBLIC, it doesn't work with 'authentication required'."
         stash(name: "source", useDefaultExcludes: true)
       }
     }
-    stage("Generating packages list") {
-      steps {
-        parallel(
-          "Build on Windows": {
-            builder("windows")
-          },
-          "Build on Linux": {
-            builder("linux")
+    stage("PackageList") {
+      parallel {
+        stage("Build on Linux") {
+          steps {
+            doublePackager('linux', params.LABEL, params.COMPONENTS)
           }
-        )
+        }
+        stage("Build on Windows") {
+          steps {
+            doublePackager('windows', params.LABEL, params.COMPONENTS)
+          }
+        }
       }
     }
     stage('Downloading and indexing packages') {
       steps {
         unarchive(mapping: ["elencone-linux.txt": "elencone-linux.txt", "elencone-windows.txt": "elencone-windows.txt"])
-        bat(script: "python download.py ${params.COLOR}")
-        bat(script: "for /D %%d IN (${params.COLOR}\\*) DO call conda index %%d")
+        bat(script: "python download.py ${params.NUANCE}")
+        bat(script: "for /D %%d IN (${params.NUANCE}\\*) DO call conda index %%d")
         // Solo indici, please!
-        // archiveArtifacts artifacts: "${params.COLOR}/*/*.tag.bz2"
+        // archiveArtifacts artifacts: "${params.NUANCE}/*/*.tag.bz2"
       }
     }
     stage('Copying packages') {
       steps {
-        bat(script: "(robocopy /MIR ${params.COLOR} ${TARGET}\\${params.COLOR}) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
+        bat(script: "(robocopy /MIR ${params.NUANCE} ${TARGET}\\${params.NUANCE}) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
       }
     }
   }
-}
-
-
-def calc_conda_env() {
-    return "${env.JOB_NAME}_${env.BUILD_NUMBER}".replace('%2F','_').replace('/', '_')
-}
-
-
-def builder(envlabel, condaenvb="base") {
-  node(envlabel) {
-    pipeline {
-      stage('Unstash') {
-        unstash "source"
-      }
-      stage('Generating packages list') {
-        condashellcmd("conda create -y -n ${CONDAENV} python=2.7", condaenvb)
-        condashellcmd("conda install -c t/${env.ANACONDA_API_TOKEN}/prometeia/channel/${SOURCELABEL} -c t/${env.ANACONDA_API_TOKEN}/prometeia -c defaults --override-channels --channel-priority -y ${params.COMPONENTS}", "${CONDAENV}")
-        script {
-          writeFile file: "elencone-${envlabel}.txt", text: condashellcmd("conda list --explicit", "${CONDAENV}", true).trim()
-        }
-        archiveArtifacts artifacts: "elencone-${envlabel}.txt"
-        condashellcmd("conda env remove -y -n ${CONDAENV}", condaenvb)
-      }
-      /*
-      stage('TearDown') {
-        deleteDir()
-      } 
-      */
+  post {
+    success {
+      slackSend color: "good", message: "Successed ${env.JOB_NAME} (<${env.BUILD_URL}|Open>)"
+      deleteDir()
     }
-  }
-}
-
-
-void shellcmd(command, returnStdout=false, inPlace=False) {
-  if (isUnix() && inPlace) {
-    return sh(script: "source ${command}", returnStdout: returnStdout)
-  } else if (isUnix()) {
-    return sh(script: command, returnStdout: returnStdout)
-  } else {
-    return bat(script:command, returnStdout: returnStdout)
-  }
-}
-
-
-void condashellcmd(command, condaenv, returnStdout=false) {
-  if (isUnix()) {
-    return sh(script: "source /home/jenkins/miniconda2/bin/activate ${condaenv}; ${command}", returnStdout: returnStdout)
-  } else {
-    return bat(script: "activate ${condaenv} && ${command} && deactivate", returnStdout: returnStdout)
+    failure {
+      slackSend color: "warning", message: "Failed ${env.JOB_NAME} (<${env.BUILD_URL}|Open>)"
+    }
   }
 }

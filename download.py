@@ -1,5 +1,5 @@
 from __future__ import print_function
-import os, sys
+import os, sys, time
 try:
     from urllib.request import urlopen # Python 3
     from urllib.parse import urlparse
@@ -8,7 +8,7 @@ except ImportError:
     from urlparse import urlparse
 
 
-def get_large_file(url, fname, length=64*1024, retries=3):
+def get_large_file(url, fname, length=64*1024, retries=5):
     print("Downloading from %s" % url)
     for tnum in range(retries):
         try:
@@ -26,7 +26,9 @@ def get_large_file(url, fname, length=64*1024, retries=3):
             return
         except IOError as ierr:
             print("WARNING: failed download of %s cause %s" % (fname, ierr))
+            time.sleep(tnum+1)
     raise RuntimeError("Failed download of %s after %d tries" % (fname, retries))
+
 
 def list_packages():
     downloadus = set()
