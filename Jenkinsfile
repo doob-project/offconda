@@ -6,13 +6,11 @@ pipeline {
   parameters {
     string(
         name: 'NUANCE',
-        defaultValue: 'PYTHO_XXYY',
-        description: 'Version name of the whole solution'
+        description: 'Version name of the whole solution (e.g. "PYTHO_0402")'
     )
     string(
         name: 'COMPONENTS',
-        defaultValue: 'pytho==4.2.1 gsf==4.2.2 gsf_datamanagement==4.2.2 ratingpro==3.3.1 pytho_docs==4.2.1',
-        description: 'Final packages and their version'
+        description: 'Final packages and their version (e.g. "pytho==4.2.1 gsf==4.2.2 gsf_datamanagement==4.2.2 ratingpro==3.3.1 pytho_docs==4.2.1")'
     )
     string(
         name: 'LABEL',
