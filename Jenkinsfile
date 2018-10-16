@@ -12,11 +12,11 @@ pipeline {
     string(
         name: 'COMPONENTS',
         description: 'Final packages and their version (e.g. "pytho==4.3.* gsf==4.3.* ratingpro==3.4.0 serversoa==1.0.* pytho_docs==4.3.* conda python==2.7.*")',
-        defaultValue: 'pytho==4.3.* gsf==4.3.* ratingpro==3.4.* serversoa==1.0.* pytho_docs==4.3.* python==2.7.15 conda==4.5.*'
+        defaultValue: 'pytho gsf ratingpro serversoa pytho_docs python==2.7.* conda==4.5.*'
     )
     string(
         name: 'LABEL',
-        defaultValue: 'pytho',
+        defaultValue: 'develop',
         description: 'Source channel'
     )
     string(
