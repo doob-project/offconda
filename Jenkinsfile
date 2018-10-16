@@ -6,11 +6,13 @@ pipeline {
   parameters {
     string(
         name: 'NUANCE',
-        description: 'Version name of the whole solution (e.g. "PYTHO_0402")'
+        description: 'Version name of the whole solution (e.g. "PYTHO_0402")',
+        defaultValue: "${env.JOB_NAME}".replace('%2F','_').replace('/', '_').replace('.', '-')
     )
     string(
         name: 'COMPONENTS',
-        description: 'Final packages and their version (e.g. "pytho==4.2.1 gsf==4.2.2 gsf_datamanagement==4.2.2 ratingpro==3.3.1 pytho_docs==4.2.1")'
+        description: 'Final packages and their version (e.g. "pytho==4.2.1 gsf==4.2.2 gsf_datamanagement==4.2.2 ratingpro==3.3.1 pytho_docs==4.2.1")',
+        defaultValue: 'pytho==4.3.* gsf==4.3.* ratingpro==3.4.* serversoa==1.0.* pytho_docs==4.3.*',
     )
     string(
         name: 'LABEL',
