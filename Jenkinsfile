@@ -7,7 +7,7 @@ pipeline {
     string(
         name: 'QUARTERLY',
         description: 'Version name of the whole solution (e.g. "PYTHO_0402")',
-        defaultValue: env.JOB_NAME
+        defaultValue: env.BRANCH_NAME
     )
     string(
         name: 'COMPONENTS',
