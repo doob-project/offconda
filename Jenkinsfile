@@ -7,7 +7,7 @@ pipeline {
     string(
         name: 'NUANCE',
         description: 'Version name of the whole solution (e.g. "PYTHO_0402")',
-        defaultValue: "${env.JOB_NAME}".replace('%2F','_').replace('/', '_').replace('.', '-')
+        defaultValue: env.JOB_NAME
     )
     string(
         name: 'COMPONENTS',
