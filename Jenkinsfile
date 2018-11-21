@@ -53,14 +53,14 @@ pipeline {
       steps {
         unarchive(mapping: ["elencone-linux.txt": "elencone-linux.txt", "elencone-windows.txt": "elencone-windows.txt"])
         bat(script: "python download.py ${params.QUARTER}")
-        bat(script: "for /D %%d IN (${params.QUARTER}\\*) DO call conda index %%d")
+        bat(script: "call conda index ${params.QUARTER}")
         // Solo indici, please!
         // archiveArtifacts artifacts: "${params.QUARTER}/*/*.tag.bz2"
       }
     }
     stage('Copying packages') {
       steps {
-        bat(script: "(robocopy /MIR ${params.QUARTER} ${TARGET}\\${params.QUARTER}) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
+        bat(script: "(robocopy /MIR ${params.QUARTER} ${params.TARGET}\\${params.QUARTER}) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
       }
     }
   }
