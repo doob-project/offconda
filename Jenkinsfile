@@ -5,18 +5,18 @@ pipeline {
   agent any
   parameters {
     string(
-        name: 'QUARTERLY',
+        name: 'QUARTER',
         description: 'Version name of the whole solution (e.g. "PYTHO_0402")',
         defaultValue: env.BRANCH_NAME
     )
     string(
         name: 'COMPONENTS',
         description: 'Final packages and their version (e.g. "pytho==4.3.* gsf==4.3.* ratingpro==3.4.0 serversoa==1.0.* pytho_docs==4.3.* conda python==2.7.*")',
-        defaultValue: 'pytho==4.5.* gsf==4.5.* ratingpro==3.4.* serversoa==1.0.* pytho_docs==4.5.* python==2.7.15 conda==4.5.*'
+        defaultValue: 'pytho==4.6.* gsf==4.6.* ratingpro==3.5.* serversoa==1.1.* pytho_docs==4.5.* python==2.7.15 conda==4.5.*'
     )
     string(
         name: 'LABEL',
-        defaultValue: 'release',
+        defaultValue: 'develop',
         description: 'Source channel'
     )
     string(
@@ -52,15 +52,15 @@ pipeline {
     stage('Downloading and indexing packages') {
       steps {
         unarchive(mapping: ["elencone-linux.txt": "elencone-linux.txt", "elencone-windows.txt": "elencone-windows.txt"])
-        bat(script: "python download.py ${params.QUARTERLY}")
-        bat(script: "for /D %%d IN (${params.QUARTERLY}\\*) DO call conda index %%d")
+        bat(script: "python download.py ${params.QUARTER}")
+        bat(script: "for /D %%d IN (${params.QUARTER}\\*) DO call conda index %%d")
         // Solo indici, please!
-        // archiveArtifacts artifacts: "${params.QUARTERLY}/*/*.tag.bz2"
+        // archiveArtifacts artifacts: "${params.QUARTER}/*/*.tag.bz2"
       }
     }
     stage('Copying packages') {
       steps {
-        bat(script: "(robocopy /MIR ${params.QUARTERLY} ${TARGET}\\${params.QUARTERLY}) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
+        bat(script: "(robocopy /MIR ${params.QUARTER} ${TARGET}\\${params.QUARTER}) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
       }
     }
   }
