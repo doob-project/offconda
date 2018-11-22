@@ -5,7 +5,7 @@ pipeline {
   agent any
   parameters {
     string(
-        name: 'QUARTERLY',
+        name: 'QUARTER',
         description: 'Version name of the whole solution (e.g. "PYTHO_0402")',
         defaultValue: env.BRANCH_NAME
     )
@@ -52,15 +52,15 @@ pipeline {
     stage('Downloading and indexing packages') {
       steps {
         unarchive(mapping: ["elencone-linux.txt": "elencone-linux.txt", "elencone-windows.txt": "elencone-windows.txt"])
-        bat(script: "python download.py ${params.QUARTERLY}")
-        bat(script: "for /D %%d IN (${params.QUARTERLY}\\*) DO call conda index %%d")
+        bat(script: "python download.py ${params.QUARTER}")
+        bat(script: "call conda index ${params.QUARTER}")
         // Solo indici, please!
-        // archiveArtifacts artifacts: "${params.QUARTERLY}/*/*.tag.bz2"
+        // archiveArtifacts artifacts: "${params.QUARTER}/*/*.tag.bz2"
       }
     }
     stage('Copying packages') {
       steps {
-        bat(script: "(robocopy /MIR ${params.QUARTERLY} ${TARGET}\\${params.QUARTERLY}) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
+        bat(script: "(robocopy /MIR ${params.QUARTER} ${params.TARGET}\\${params.QUARTER}) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
       }
     }
   }
