@@ -9,7 +9,7 @@ except ImportError:
 import ssl
 
 
-def get_large_file(url, fname, length=64*1024, retries=10):
+def get_large_file(url, fname, length=64*1024, retries=5):
     print("Downloading from %s" % url)
     ssl._https_verify_certificates(True)
     for tnum in range(retries):
@@ -29,7 +29,7 @@ def get_large_file(url, fname, length=64*1024, retries=10):
         except IOError as ierr:
             print("WARNING: failed download of %s cause %s" % (fname, ierr))
             time.sleep(tnum+1)
-            if tnum > 3:
+            if tnum > 1:
                 print("WARNING: Disabling SSL certificates verification")
                 ssl._https_verify_certificates(False)
     raise RuntimeError("Failed download of %s after %d tries" % (fname, retries))
