@@ -39,7 +39,7 @@ pipeline {
       parallel {
         stage("Build on Linux") {
           steps {
-            doublePackager('linux', params.LABEL, params.COMPONENTS)
+            doublePackager('linux', params.LABEL, params.COMPONENTS + " supervisor==3.*")
           }
         }
         stage("Build on Windows") {
