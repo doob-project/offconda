@@ -16,7 +16,7 @@ pipeline {
     )
     string(
         name: 'LABEL',
-        defaultValue: 'release',
+        defaultValue: 'pytho',
         description: 'Source channel'
     )
     string(
