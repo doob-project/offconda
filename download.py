@@ -1,15 +1,17 @@
 from __future__ import print_function
 import os, sys, time
 try:
-    from urllib.request import urlopen # Python 3
+    from urllib.request import urlopen  # Python 3
     from urllib.parse import urlparse
 except ImportError:
-    from urllib2 import urlopen # Python 2
+    from urllib2 import urlopen  # Python 2
     from urlparse import urlparse
+import ssl
 
 
 def get_large_file(url, fname, length=64*1024, retries=5):
     print("Downloading from %s" % url)
+    ssl._https_verify_certificates(True)
     for tnum in range(retries):
         try:
             print("- Try %d for %s: " % (tnum+1, fname), end='')
@@ -27,6 +29,9 @@ def get_large_file(url, fname, length=64*1024, retries=5):
         except IOError as ierr:
             print("WARNING: failed download of %s cause %s" % (fname, ierr))
             time.sleep(tnum+1)
+            if tnum > 1:
+                print("WARNING: Disabling SSL certificates verification")
+                ssl._https_verify_certificates(False)
     raise RuntimeError("Failed download of %s after %d tries" % (fname, retries))
 
 
