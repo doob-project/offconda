@@ -28,6 +28,8 @@ pipeline {
     stage('Bootstrap') {
       steps {
         echo "NB: The packages should be PRIVATE o PUBLIC, it doesn't work with 'authentication required'."
+        writeFile file: 'components.txt', text: "${env.COMPONENTS}"
+        archiveArtifacts artifacts: "components.txt"
         stash(name: "source", useDefaultExcludes: true)
       }
     }
@@ -45,9 +47,9 @@ pipeline {
         }
       }
     }
-    stage('Downloading and publishing') {
-        when {
-          buildingTag()
+    stage('Downloading and Indexing') {
+      when {
+        buildingTag()
       }
       steps {
         unarchive(mapping: ["elencone-linux.txt": "elencone-linux.txt", "elencone-windows.txt": "elencone-windows.txt"])
@@ -55,6 +57,10 @@ pipeline {
         bat(script: "call conda index ${params.QUARTER}")
         // Solo indici, please!
         // archiveArtifacts artifacts: "${params.QUARTER}/*/*.tag.bz2"
+      }
+    stage('Publishing') {
+      when {
+        buildingTag()
       }
       steps {
         bat(script: "(robocopy /MIR ${params.QUARTER} ${params.TARGET}\\${params.QUARTER}) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
