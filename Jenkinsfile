@@ -58,6 +58,7 @@ pipeline {
         // Solo indici, please!
         // archiveArtifacts artifacts: "${params.QUARTER}/*/*.tag.bz2"
       }
+    }
     stage('Publishing') {
       when {
         buildingTag()
