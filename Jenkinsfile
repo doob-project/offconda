@@ -11,7 +11,7 @@ pipeline {
     )
     string(
         name: 'LABEL',
-        defaultValue: env.TAG_NAME ? (env.TAG_NAME.contains('rc') ? 'release' : 'main') : env.BRANCH_NAME.split('/')[0].replace('hotfix', 'release').replace('master', 'main'),
+        defaultValue: env.TAG_NAME ? (env.TAG_NAME.contains('rc') ? 'release' : 'main') : 'release',
         description: 'Source label'
     )
     string(
@@ -36,12 +36,7 @@ pipeline {
       parallel {
         stage("Build on Linux") {
           steps {
-            doublePackager('linux', env.LABEL, params.COMPONENTS + " supervisor==3.*")
-          }
-        }
-        stage("Build on Windows") {
-          steps {
-            doublePackager('windows', env.LABEL, params.COMPONENTS)
+            doublePackager('linux', params.LABEL, params.COMPONENTS + " supervisor==3.* libgcc-ng==7.2.* libstdcxx-ng=7.2.*")
           }
         }
       }
@@ -51,7 +46,7 @@ pipeline {
         buildingTag()
       }
       steps {
-        unarchive(mapping: ["elencone-linux.txt": "elencone-linux.txt", "elencone-windows.txt": "elencone-windows.txt"])
+        unarchive(mapping: ["elencone-linux.txt": "elencone-linux.txt"])
         bat(script: "python download.py ${env.TAG_NAME}")
         bat(script: "call conda index ${env.TAG_NAME}")
         // Solo indici, please!
