@@ -5,19 +5,14 @@ pipeline {
   agent any
   parameters {
     string(
-        name: 'QUARTER',
-        description: 'Version name of the whole solution (e.g. "PYTHO_0402")',
-        defaultValue: env.BRANCH_NAME
-    )
-    string(
         name: 'COMPONENTS',
-        description: 'Final packages and their version (e.g. "pytho==4.3.* gsf==4.3.* ratingpro==3.4.0 serversoa==1.0.* pytho_docs==4.3.* conda python==2.7.*")',
-        defaultValue: 'pytho==4.6.* gsf==4.6.* ratingpro==3.6.* serversoa==1.0.* pytho_docs==4.6.* python==2.7.15 conda==4.6.*'
+        description: 'Final packages and version (e.g. "pytho==4.3.* gsf==4.3.* ratingpro==3.4.0 serversoa==1.0.* pytho_docs==4.3.* conda python==2.7.*")',
+        defaultValue: 'pytho==4.6.1 gsf==4.6.1 ratingpro==3.6.1 pytho_docs==4.6.1 serversoa==1.0.5 python==2.7.15 conda==4.6.*'
     )
     string(
         name: 'LABEL',
-        defaultValue: 'pytho',
-        description: 'Source channel'
+        defaultValue: env.TAG_NAME ? (env.TAG_NAME.contains('rc') ? 'release' : 'main') : env.BRANCH_NAME.split('/')[0].replace('hotfix', 'release').replace('master', 'main'),
+        description: 'Source label'
     )
     string(
         name: 'TARGET',
@@ -32,6 +27,8 @@ pipeline {
     stage('Bootstrap') {
       steps {
         echo "NB: The packages should be PRIVATE o PUBLIC, it doesn't work with 'authentication required'."
+        writeFile file: 'components.txt', text: "${env.COMPONENTS}"
+        archiveArtifacts artifacts: "components.txt"
         stash(name: "source", useDefaultExcludes: true)
       }
     }
@@ -39,35 +36,43 @@ pipeline {
       parallel {
         stage("Build on Linux") {
           steps {
-            doublePackager('linux', params.LABEL, params.COMPONENTS + " supervisor==3.*")
+            doublePackager('linux', env.LABEL, params.COMPONENTS + " supervisor==3.*")
           }
         }
         stage("Build on Windows") {
           steps {
-            doublePackager('windows', params.LABEL, params.COMPONENTS)
+            doublePackager('windows', env.LABEL, params.COMPONENTS)
           }
         }
       }
     }
-    stage('Downloading and indexing packages') {
+    stage('Downloading and Indexing') {
+      when {
+        buildingTag()
+      }
       steps {
         unarchive(mapping: ["elencone-linux.txt": "elencone-linux.txt", "elencone-windows.txt": "elencone-windows.txt"])
-        bat(script: "python download.py ${params.QUARTER}")
-        bat(script: "call conda index ${params.QUARTER}")
+        bat(script: "python download.py ${env.TAG_NAME}")
+        bat(script: "call conda index ${env.TAG_NAME}")
         // Solo indici, please!
-        // archiveArtifacts artifacts: "${params.QUARTER}/*/*.tag.bz2"
+        // archiveArtifacts artifacts: "${env.TAG_NAME}/*/*.tag.bz2"
       }
     }
-    stage('Copying packages') {
+    stage('Publishing') {
+      when {
+        buildingTag()
+      }
       steps {
-        bat(script: "(robocopy /MIR ${params.QUARTER} ${params.TARGET}\\${params.QUARTER}) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
+        bat(script: "(robocopy /MIR ${env.TAG_NAME} ${params.TARGET}\\${env.TAG_NAME}) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
       }
     }
   }
   post {
+    always {
+      deleteDir()
+    }
     success {
       slackSend color: "good", message: "Successed ${env.JOB_NAME} (<${env.BUILD_URL}|Open>)"
-      deleteDir()
     }
     failure {
       slackSend color: "warning", message: "Failed ${env.JOB_NAME} (<${env.BUILD_URL}|Open>)"
