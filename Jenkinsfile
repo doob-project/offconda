@@ -6,8 +6,13 @@ pipeline {
   parameters {
     string(
         name: 'COMPONENTS',
-        description: 'Final packages and their version (e.g. "pytho==4.3.* gsf==4.3.* ratingpro==3.4.0 serversoa==1.0.* pytho_docs==4.3.* conda python==2.7.*")',
-        defaultValue: 'pytho==4.6.* gsf==4.6.* ratingpro==3.6.* serversoa==1.0.* pytho_docs==4.6.* python==2.7.15 conda==4.6.*'
+        description: 'Final packages and version (e.g. "pytho==4.3.* gsf==4.3.* ratingpro==3.4.0 serversoa==1.0.* pytho_docs==4.3.* conda python==2.7.*")',
+        defaultValue: 'pytho==4.6.1 gsf==4.6.1 ratingpro==3.6.1 pytho_docs==4.6.1 serversoa==1.0.5 python==2.7.15 conda==4.6.*'
+    )
+    string(
+        name: 'LABEL',
+        defaultValue: env.TAG_NAME ? (env.TAG_NAME.contains('rc') ? 'release' : 'main') : env.BRANCH_NAME.split('/')[0].replace('hotfix', 'release').replace('master', 'main'),
+        description: 'Source label'
     )
     string(
         name: 'TARGET',
@@ -17,7 +22,6 @@ pipeline {
   }
   environment {
     CONDAENV = "${env.JOB_NAME}_${env.BUILD_NUMBER}".replace('%2F','_').replace('/', '_')
-    LABEL = env.BRANCH_NAME.split('/')[0].replace('hotfix', 'release').replace('master', 'main')
   }
   stages {
     stage('Bootstrap') {
@@ -60,6 +64,14 @@ pipeline {
       }
       steps {
         bat(script: "(robocopy /MIR ${env.TAG_NAME} ${params.TARGET}\\${env.TAG_NAME}) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
+      }
+    }
+    stage('Testing') {
+      when {
+        buildingTag()
+      }
+      steps {
+        bat(script: "conda install pytho ratingpro serversoa -c file://${env.TARGET} --override-channels --dry-run")
       }
     }
   }
