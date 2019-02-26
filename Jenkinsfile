@@ -76,14 +76,12 @@ pipeline {
     }
   }
   post {
-    always {
-      deleteDir()
-    }
     success {
       slackSend color: "good", message: "Successed ${env.JOB_NAME} (<${env.BUILD_URL}|Open>)"
     }
     failure {
       slackSend color: "warning", message: "Failed ${env.JOB_NAME} (<${env.BUILD_URL}|Open>)"
+      deleteDir()
     }
   }
 }
