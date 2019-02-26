@@ -78,10 +78,10 @@ pipeline {
   post {
     success {
       slackSend color: "good", message: "Successed ${env.JOB_NAME} (<${env.BUILD_URL}|Open>)"
+      deleteDir()
     }
     failure {
       slackSend color: "warning", message: "Failed ${env.JOB_NAME} (<${env.BUILD_URL}|Open>)"
-      deleteDir()
     }
   }
 }
