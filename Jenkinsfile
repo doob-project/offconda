@@ -71,7 +71,7 @@ pipeline {
         buildingTag()
       }
       steps {
-        bat(script: "conda install pytho ratingpro serversoa -c file://${params.TARGET}\\${env.TAG_NAME} --override-channels --dry-run")
+        bat(script: "conda install pytho ratingpro serversoa -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
       }
     }
   }
