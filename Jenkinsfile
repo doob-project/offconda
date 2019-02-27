@@ -7,11 +7,11 @@ pipeline {
     string(
         name: 'COMPONENTS',
         description: 'Final packages and version (e.g. "pytho==4.3.* gsf==4.3.* ratingpro==3.4.0 serversoa==1.0.* pytho_docs==4.3.* conda python==2.7.*")',
-        defaultValue: 'pytho==4.6.1 gsf==4.6.1 ratingpro==3.6.1 pytho_docs==4.6.1 serversoa==1.0.5 python==2.7.15 conda==4.6.*'
+        defaultValue: 'pytho==4.6.2 gsf==4.6.2 ratingpro==3.6.2 pytho_docs==4.6.2 serversoa==1.0.5 python==2.7.15 conda==4.6.*'
     )
     string(
         name: 'LABEL',
-        defaultValue: env.TAG_NAME ? (env.TAG_NAME.contains('rc') ? 'release' : 'main') : 'release',
+        defaultValue: env.TAG_NAME ? (env.TAG_NAME.contains('rc') ? 'release' : 'main') : env.BRANCH_NAME.split('/')[0].replace('hotfix', 'release').replace('master', 'main'),
         description: 'Source label'
     )
     string(
@@ -58,16 +58,22 @@ pipeline {
         buildingTag()
       }
       steps {
-        bat(script: "(robocopy /MIR ${env.TAG_NAME} ${params.TARGET}\\${env.TAG_NAME}) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
+        bat(script: "(robocopy /MIR ${env.TAG_NAME} ${params.TARGET}\\${env.TAG_NAME} /XD ${env.TAG_NAME}\\linux-64\\.cache ${env.TAG_NAME}\\noarch\\.cache ) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
+      }
+    }
+    stage('Testing') {
+      when {
+        buildingTag()
+      }
+      steps {
+        bat(script: "conda install pytho ratingpro serversoa -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
       }
     }
   }
   post {
-    always {
-      deleteDir()
-    }
     success {
       slackSend color: "good", message: "Successed ${env.JOB_NAME} (<${env.BUILD_URL}|Open>)"
+      deleteDir()
     }
     failure {
       slackSend color: "warning", message: "Failed ${env.JOB_NAME} (<${env.BUILD_URL}|Open>)"
