@@ -7,7 +7,7 @@ pipeline {
     string(
         name: 'COMPONENTS',
         description: 'Final packages and version (e.g. "pytho==4.3.* gsf==4.3.* ratingpro==3.4.0 serversoa==1.0.* pytho_docs==4.3.* conda python==2.7.*")',
-        defaultValue: 'pytho==4.6.3 gsf==4.6.* ratingpro==3.6.3 pytho_docs==4.6.2 serversoa==1.0.5 python==2.7.15 conda==4.6.* conda-env==2.6.*'
+        defaultValue: 'pytho==4.6.3 gsf==4.6.4 ratingpro==3.6.4 pytho_docs==4.6.2 serversoa==1.0.5 python==2.7.15 conda==4.6.* conda-env==2.6.*'
     )
     string(
         name: 'LABEL',
@@ -51,6 +51,14 @@ pipeline {
         bat(script: "call conda index ${env.TAG_NAME}")
         // Solo indici, please!
         // archiveArtifacts artifacts: "${env.TAG_NAME}/*/*.tag.bz2"
+      }
+    }
+    stage('Checking') {
+      when {
+        buildingTag()
+      }
+      steps {
+        bat(script: "python distrocheck.py ${env.TAG_NAME}")
       }
     }
     stage('Publishing') {
