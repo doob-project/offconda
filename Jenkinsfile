@@ -7,7 +7,7 @@ pipeline {
     string(
         name: 'COMPONENTS',
         description: 'Final packages and version (e.g. "pytho==4.3.* gsf==4.3.* ratingpro==3.4.0 serversoa==1.0.* pytho_docs==4.3.* conda python==2.7.*")',
-        defaultValue: 'pytho==4.6.3 gsf==4.6.4 ratingpro==3.6.4 pytho_docs==4.6.2 serversoa==1.0.5 python==2.7.15 conda==4.6.* conda-env==2.6.*'
+        defaultValue: 'pytho==4.6.3 gsf==4.6.4 ratingpro==3.6.4 pytho_docs==4.6.2 serversoa==1.0.5 python==2.7.16 conda==4.6.* conda-env==2.6.*'
     )
     string(
         name: 'LABEL',
@@ -69,12 +69,14 @@ pipeline {
         bat(script: "(robocopy /MIR ${env.TAG_NAME} ${params.TARGET}\\${env.TAG_NAME} /XD ${env.TAG_NAME}\\linux-64\\.cache ${env.TAG_NAME}\\noarch\\.cache ) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
       }
     }
-    stage('Testing') {
-      when {
-        buildingTag()
-      }
-      steps {
-        bat(script: "conda install pytho ratingpro serversoa -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
+    node('linux') {
+      stage('Testing') {
+        when {
+          buildingTag()
+        }
+        steps {
+          bat(script: "conda install pytho ratingpro serversoa -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
+        }
       }
     }
   }
