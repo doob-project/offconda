@@ -69,12 +69,12 @@ pipeline {
         bat(script: "(robocopy /MIR ${env.TAG_NAME} ${params.TARGET}\\${env.TAG_NAME} /XD ${env.TAG_NAME}\\linux-64\\.cache ${env.TAG_NAME}\\noarch\\.cache ) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
       }
     }
-    node('linux') {
-      stage('Testing') {
-        when {
-          buildingTag()
-        }
-        steps {
+    stage('Testing') {
+      when {
+        buildingTag()
+      }
+      steps {
+        node('linux') {
           bat(script: "conda install pytho ratingpro serversoa -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
         }
       }
