@@ -36,7 +36,7 @@ pipeline {
       parallel {
         stage("Build on Linux") {
           steps {
-            doublePackager('linux', params.LABEL, params.COMPONENTS + " supervisor==3.*")
+            doublePackager('linux', params.LABEL, params.COMPONENTS + " supervisor=3 icu=58 ")
           }
         }
         stage("Build on Windows") {
