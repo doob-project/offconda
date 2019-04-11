@@ -7,7 +7,7 @@ pipeline {
     string(
         name: 'COMPONENTS',
         description: 'Final packages and version (e.g. "pytho=4.6.4 gsf=4.6.6rc2 ratingpro=3.6.5 pytho_docs=4.6.3 serversoa=1.0.5 python=2.7.15 conda=4.6 conda-env=2.6")',
-        defaultValue: 'pytho=4.6.4 gsf=4.6.6rc2.dev23 ratingpro=3.6.5 pytho_docs=4.6.3 serversoa=1.0.5 python=2.7.15 conda=4.6 conda-env=2.6'
+        defaultValue: 'pytho=4.6.4 gsf=4.6.7rc2 ratingpro=3.6.5 pytho_docs=4.6.3 serversoa=1.0.5 python=2.7.15 conda=4.6 conda-env=2.6'
     )
     string(
         name: 'LABEL',
