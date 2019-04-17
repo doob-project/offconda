@@ -6,8 +6,8 @@ pipeline {
   parameters {
     string(
         name: 'COMPONENTS',
-        description: 'Final packages and version (e.g. "pytho==4.3.* gsf==4.3.* ratingpro==3.4.0 serversoa==1.0.* pytho_docs==4.3.* conda python==2.7.*")',
-        defaultValue: 'pytho==4.7.* gsf==4.7.* ratingpro==3.7.* pytho_docs==4.7.* serversoa>=1.0.5 python==2.7.15 conda==4.6.* conda-env==2.6.*'
+        description: 'Final packages and version (e.g. "pytho=4.6.4 gsf=4.6.6rc2 ratingpro=3.6.5 pytho_docs=4.6.3 serversoa=1.0.5 python=2.7.15 conda=4.6 conda-env=2.6")',
+        defaultValue: 'pytho=4.6.4 gsf=4.6.7 ratingpro=3.6.6 pytho_docs=4.6.3 serversoa=1.0.5 python=2.7.16 conda=4.6 conda-env=2.6'
     )
     string(
         name: 'LABEL',
@@ -36,7 +36,7 @@ pipeline {
       parallel {
         stage("Build on Linux") {
           steps {
-            doublePackager('linux', env.LABEL, params.COMPONENTS + " supervisor==3.*")
+            doublePackager('linux', params.LABEL, params.COMPONENTS + " supervisor=3 icu=58 ")
           }
         }
         stage("Build on Windows") {
@@ -58,6 +58,14 @@ pipeline {
         // archiveArtifacts artifacts: "${env.TAG_NAME}/*/*.tag.bz2"
       }
     }
+    stage('Checking') {
+      when {
+        buildingTag()
+      }
+      steps {
+        bat(script: "python distrocheck.py ${env.TAG_NAME}")
+      }
+    }
     stage('Publishing') {
       when {
         buildingTag()
@@ -72,6 +80,9 @@ pipeline {
       }
       steps {
         bat(script: "conda install pytho ratingpro serversoa -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
+        node('linux') {
+          sh(script: "conda install pytho ratingpro serversoa -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
+        }
       }
     }
   }
