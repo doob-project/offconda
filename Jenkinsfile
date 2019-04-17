@@ -27,14 +27,7 @@ pipeline {
     stage('Bootstrap') {
       steps {
         echo "NB: The packages should be PRIVATE o PUBLIC, it doesn't work with 'authentication required'."
-        if (! params.COMPONENTS) {
-          writeFile file: 'components.txt', text: readFile('versions.txt')
-        } else {
-          echo "WARNIJNG: Forcing versions to ${params.COMPONENTS}"
-          writeFile file: 'components.txt', text: "${params.COMPONENTS}"
-        }
-        archiveArtifacts artifacts: "components.txt"
-        stash(name: "source", useDefaultExcludes: true)
+        writeFile file: 'components.txt', text: (params.COMPONENTS ? ${params.COMPONENTS} : readFile('versions.txt'))
       }
     }
     stage("Packages Discovery") {
