@@ -35,10 +35,10 @@ def get_large_file(url, fname, length=64*1024, retries=5):
     raise RuntimeError("Failed download of %s after %d tries" % (fname, retries))
 
 
-def list_packages():
+def list_packages(elencone=None):
     downloadus = set()
     for listfile in os.listdir('.'):
-        if not listfile.startswith('elencone-'):
+        if not (elencone is None and listfile.startswith('elencone-') or listfile == elencone):
             continue
         with open(listfile) as listf:
             for url in listf.readlines():
@@ -49,8 +49,9 @@ def list_packages():
 
 
 if __name__ == "__main__":
-    outfolder = sys.argv[1] if len(sys.argv) == 2 else 'tmp' 
-    for fileurl in list_packages():
+    outfolder = sys.argv[1] if len(sys.argv) >= 2 else 'tmp'
+    elencone = sys.argv[2] if len(sys.argv) >= 3 else None
+    for fileurl in list_packages(elencone):
         folder, name = os.path.split(urlparse(fileurl).path)
         archfolder = os.path.join(outfolder, os.path.basename(folder))
         if not os.path.isdir(archfolder):

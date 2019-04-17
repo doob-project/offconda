@@ -6,8 +6,8 @@ pipeline {
   parameters {
     string(
         name: 'COMPONENTS',
-        description: 'Final packages and version (e.g. "pytho=4.6.4 gsf=4.6.6rc2 ratingpro=3.6.5 pytho_docs=4.6.3 serversoa=1.0.5 python=2.7.15 conda=4.6 conda-env=2.6")',
-        defaultValue: 'pytho=4.6.4 gsf=4.6.7 ratingpro=3.6.6 pytho_docs=4.6.3 serversoa=1.0.5 python=2.7.16 conda=4.6 conda-env=2.6'
+        description: 'Forced Final packages and version',
+        defaultValue: ''
     )
     string(
         name: 'LABEL',
@@ -27,26 +27,37 @@ pipeline {
     stage('Bootstrap') {
       steps {
         echo "NB: The packages should be PRIVATE o PUBLIC, it doesn't work with 'authentication required'."
-        writeFile file: 'components.txt', text: "${env.COMPONENTS}"
+        if (params.COMPONENTS) {
+            echo "WARNIJNG: Forcing versions to ${params.COMPONENTS}"
+            writeFile file: 'components.txt', text: "${params.COMPONENTS}"
+        } else {
+            writeFile file: 'components.txt', text: readFile('versions.txt')
+        }
         archiveArtifacts artifacts: "components.txt"
         stash(name: "source", useDefaultExcludes: true)
       }
     }
-    stage("PackageList") {
+    stage("Packages Discovery") {
       parallel {
-        stage("Build on Linux") {
+        stage("Target Linux") {
           steps {
-            doublePackager('linux', params.LABEL, params.COMPONENTS + " supervisor=3 icu=58 ")
+            doublePackager('linux', params.LABEL, readFile("components.txt") + " " + readFile("linux.txt"))
           }
         }
-        stage("Build on Windows") {
+        stage("Target Linux Legacy") {
           steps {
-            doublePackager('windows', env.LABEL, params.COMPONENTS)
+             doublePackager('linux-legacy', params.LABEL, readFile("components.txt") + " " + readFile("linux-legacy.txt"))
+          }
+        }
+        stage("Target Windows") {
+          steps {
+            doublePackager('windows', params.LABEL, readFile("components.txt") + " " + readFile("windows.txt"))
           }
         }
       }
     }
-    stage('Downloading and Indexing') {
+
+    stage('Packages Downloading and Indexing') {
       when {
         buildingTag()
       }
@@ -54,11 +65,9 @@ pipeline {
         unarchive(mapping: ["elencone-linux.txt": "elencone-linux.txt", "elencone-windows.txt": "elencone-windows.txt"])
         bat(script: "python download.py ${env.TAG_NAME}")
         bat(script: "call conda index ${env.TAG_NAME}")
-        // Solo indici, please!
-        // archiveArtifacts artifacts: "${env.TAG_NAME}/*/*.tag.bz2"
       }
     }
-    stage('Checking') {
+    stage('Checking Distribution') {
       when {
         buildingTag()
       }
@@ -66,7 +75,7 @@ pipeline {
         bat(script: "python distrocheck.py ${env.TAG_NAME}")
       }
     }
-    stage('Publishing') {
+    stage('Publishing Distribution') {
       when {
         buildingTag()
       }
@@ -74,7 +83,7 @@ pipeline {
         bat(script: "(robocopy /MIR ${env.TAG_NAME} ${params.TARGET}\\${env.TAG_NAME} /XD ${env.TAG_NAME}\\win-64\\.cache ${env.TAG_NAME}\\linux-64\\.cache ${env.TAG_NAME}\\noarch\\.cache ) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
       }
     }
-    stage('Testing') {
+    stage('Testing Distribution') {
       when {
         buildingTag()
       }
@@ -82,6 +91,43 @@ pipeline {
         bat(script: "conda install pytho ratingpro serversoa -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
         node('linux') {
           sh(script: "conda install pytho ratingpro serversoa -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
+        }
+      }
+    }
+
+    stage('Packages Downloading and Indexing - Legacy') {
+      when {
+        buildingTag()
+      }
+      steps {
+        unarchive(mapping: ["elencone-linux-legacy.txt": "elencone-linux-legacy.txt"])
+        bat(script: "python download.py ${env.TAG_NAME}-legacy elencone-linux-legacy.txt")
+        bat(script: "call conda index ${env.TAG_NAME}-legacy")
+      }
+    }
+    stage('Checking Distribution - Legacy') {
+      when {
+        buildingTag()
+      }
+      steps {
+        bat(script: "python distrocheck.py ${env.TAG_NAME}-legacy")
+      }
+    }
+    stage('Publishing Distribution - Legacy') {
+      when {
+        buildingTag()
+      }
+      steps {
+        bat(script: "(robocopy /MIR ${env.TAG_NAME}-legacy ${params.TARGET}\\${env.TAG_NAME}-legacy /XD ${env.TAG_NAME}-legacy\\linux-64\\.cache ${env.TAG_NAME}\\noarch\\.cache ) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
+      }
+    }
+    stage('Testing Distribution - Legacy') {
+      when {
+        buildingTag()
+      }
+      steps {
+        node('linux') {
+          sh(script: "conda install pytho ratingpro serversoa -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME}-legacy --override-channels --dry-run")
         }
       }
     }
