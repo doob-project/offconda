@@ -27,7 +27,7 @@ pipeline {
     stage('Bootstrap') {
       steps {
         echo "NB: The packages should be PRIVATE o PUBLIC, it doesn't work with 'authentication required'."
-        writeFile file: 'components.txt', text: (params.COMPONENTS ? ${params.COMPONENTS} : readFile('versions.txt'))
+        writeFile file: 'components.txt', text: (params.COMPONENTS ? params.COMPONENTS : readFile('versions.txt'))
       }
     }
     stage("Packages Discovery") {
