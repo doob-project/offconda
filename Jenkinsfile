@@ -28,6 +28,8 @@ pipeline {
       steps {
         echo "NB: The packages should be PRIVATE o PUBLIC, it doesn't work with 'authentication required'."
         writeFile file: 'components.txt', text: (params.COMPONENTS ? params.COMPONENTS : readFile('versions.txt'))
+        archiveArtifacts artifacts: "components.txt"
+        stash(name: "source", useDefaultExcludes: true)
       }
     }
     stage("Packages Discovery") {
