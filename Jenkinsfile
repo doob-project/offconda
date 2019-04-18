@@ -95,7 +95,7 @@ pipeline {
         buildingTag()
       }
       steps {
-        timeout(time: 1, unit: "HOURS") {
+        timeout(time: 24, unit: "HOURS") {
           input(message: "Ready to publish the distributions?", ok: "OK, publish now!")
         }
       }
