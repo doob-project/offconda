@@ -91,7 +91,11 @@ pipeline {
     }
 
     stage ('Distribution publish confirm') {
-      input("Ready to publish the distributions?")
+      steps {
+        timeout(time: 1, unit: “HOURS”) {
+          input(message: "Ready to publish the distributions?", ok: "OK, publish now!"
+        }
+      }
     }
 
     stage('Publishing Distribution') {
