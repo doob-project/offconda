@@ -70,25 +70,6 @@ pipeline {
         bat(script: "python distrocheck.py ${env.TAG_NAME}")
       }
     }
-    stage('Publishing Distribution') {
-      when {
-        buildingTag()
-      }
-      steps {
-        bat(script: "(robocopy /MIR ${env.TAG_NAME} ${params.TARGET}\\${env.TAG_NAME} /XD ${env.TAG_NAME}\\win-64\\.cache ${env.TAG_NAME}\\linux-64\\.cache ${env.TAG_NAME}\\noarch\\.cache ) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
-      }
-    }
-    stage('Testing Distribution') {
-      when {
-        buildingTag()
-      }
-      steps {
-        bat(script: "conda install pytho ratingpro serversoa -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
-        node('linux') {
-          sh(script: "conda install pytho ratingpro serversoa -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
-        }
-      }
-    }
 
     stage('Packages Downloading and Indexing - Legacy') {
       when {
@@ -106,6 +87,34 @@ pipeline {
       }
       steps {
         bat(script: "python distrocheck.py ${env.TAG_NAME}-legacy")
+      }
+    }
+
+    stage ('Distribution publish confirm') {
+      steps {
+        timeout(time: 1, unit: “HOURS”) {
+          input(message: "Ready to publish the distributions?", ok: "OK, publish now!")
+        }
+      }
+    }
+
+    stage('Publishing Distribution') {
+      when {
+        buildingTag()
+      }
+      steps {
+        bat(script: "(robocopy /MIR ${env.TAG_NAME} ${params.TARGET}\\${env.TAG_NAME} /XD ${env.TAG_NAME}\\win-64\\.cache ${env.TAG_NAME}\\linux-64\\.cache ${env.TAG_NAME}\\noarch\\.cache ) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
+      }
+    }
+    stage('Testing Distribution') {
+      when {
+        buildingTag()
+      }
+      steps {
+        bat(script: "conda install pytho ratingpro serversoa -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
+        node('linux') {
+          sh(script: "conda install pytho ratingpro serversoa -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
+        }
       }
     }
     stage('Publishing Distribution - Legacy') {
@@ -126,6 +135,7 @@ pipeline {
         }
       }
     }
+
   }
   post {
     success {
