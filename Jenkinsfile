@@ -91,8 +91,11 @@ pipeline {
     }
 
     stage ('Distribution publish confirm') {
+      when {
+        buildingTag()
+      }
       steps {
-        timeout(time: 1, unit: “HOURS”) {
+        timeout(time: 1, unit: "HOURS") {
           input(message: "Ready to publish the distributions?", ok: "OK, publish now!")
         }
       }
