@@ -33,7 +33,7 @@ pipeline {
       steps {
         echo "NB: The packages should be PRIVATE o PUBLIC, it doesn't work with 'authentication required'."
         writeFile file: 'components.txt', text: (params.COMPONENTS ? params.COMPONENTS : readFile('versions.txt'))
-        archiveArtifacts artifacts: "components.txt"
+        archiveArtifacts artifacts: "*.txt"
         stash(name: "source", useDefaultExcludes: true)
       }
     }
@@ -73,6 +73,7 @@ pipeline {
       }
       steps {
         bat(script: "python distrocheck.py ${env.TAG_NAME}")
+        archiveArtifacts artifacts: "{env.TAG_NAME}/**/*.json"
       }
     }
 
@@ -92,6 +93,7 @@ pipeline {
       }
       steps {
         bat(script: "python distrocheck.py ${env.TAG_NAME}-legacy")
+        archiveArtifacts artifacts: "{env.TAG_NAME}-legacy/**/*.json"
       }
     }
 
