@@ -73,7 +73,7 @@ pipeline {
       }
       steps {
         bat(script: "python distrocheck.py ${env.TAG_NAME}")
-        archiveArtifacts artifacts: "{env.TAG_NAME}/**/*.json"
+        archiveArtifacts artifacts: "${env.TAG_NAME}/**/*.json"
       }
     }
 
@@ -93,7 +93,7 @@ pipeline {
       }
       steps {
         bat(script: "python distrocheck.py ${env.TAG_NAME}-legacy")
-        archiveArtifacts artifacts: "{env.TAG_NAME}-legacy/**/*.json"
+        archiveArtifacts artifacts: "${env.TAG_NAME}-legacy/**/*.json"
       }
     }
 
