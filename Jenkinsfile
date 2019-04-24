@@ -20,7 +20,7 @@ pipeline {
         description: 'Target offline repository'
     )
     booleanParam(
-        parameterName: 'ASK_PUB_CONFIRM',
+        name: 'ASK_PUB_CONFIRM',
         defaultValue: true,
         description: "Wait for confirm before publishing"
     )
