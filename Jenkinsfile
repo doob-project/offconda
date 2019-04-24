@@ -19,6 +19,11 @@ pipeline {
         defaultValue: 'C:\\CONDAOFFLINE',
         description: 'Target offline repository'
     )
+    booleanParam(
+        parameterName: 'ASK_PUB_CONFIRM',
+        defaultValue: true,
+        description: "Wait for confirm before publishing"
+    )
   }
   environment {
     CONDAENV = "${env.JOB_NAME}_${env.BUILD_NUMBER}".replace('%2F','_').replace('/', '_')
@@ -92,7 +97,10 @@ pipeline {
 
     stage ('Distribution publish confirm') {
       when {
-        buildingTag()
+        allOf {
+          buildingTag()
+          expression { return params.ASK_PUB_CONFIRM }
+        }
       }
       steps {
         timeout(time: 24, unit: "HOURS") {
