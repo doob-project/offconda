@@ -106,6 +106,7 @@ pipeline {
       steps {
         bat(script: "conda install pytho ratingpro serversoa " + readFile("windows.txt") + " -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
         node('linux') {
+          unarchive(mapping: ["linux.txt": "linux.txt", "linux-legacy.txt": "linux-legacy.txt"])
           sh(script: "conda install pytho ratingpro serversoa " + readFile("linux.txt") + " -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
           sh(script: "conda install pytho ratingpro serversoa " + readFile("linux-legacy.txt") + " -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
         }
