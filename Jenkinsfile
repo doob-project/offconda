@@ -19,6 +19,11 @@ pipeline {
         defaultValue: 'C:\\CONDAOFFLINE',
         description: 'Target offline repository'
     )
+    booleanParam(
+        name: 'ASK_PUB_CONFIRM',
+        defaultValue: true,
+        description: "Wait for confirm before publishing"
+    )
   }
   environment {
     CONDAENV = "${env.JOB_NAME}_${env.BUILD_NUMBER}".replace('%2F','_').replace('/', '_')
@@ -28,7 +33,7 @@ pipeline {
       steps {
         echo "NB: The packages should be PRIVATE o PUBLIC, it doesn't work with 'authentication required'."
         writeFile file: 'components.txt', text: (params.COMPONENTS ? params.COMPONENTS : readFile('versions.txt'))
-        archiveArtifacts artifacts: "components.txt"
+        archiveArtifacts artifacts: "*.txt"
         stash(name: "source", useDefaultExcludes: true)
       }
     }
@@ -57,7 +62,7 @@ pipeline {
         buildingTag()
       }
       steps {
-        unarchive(mapping: ["elencone-linux.txt": "elencone-linux.txt", "elencone-windows.txt": "elencone-windows.txt"])
+        unarchive(mapping: ["elencone-linux.txt": "elencone-linux.txt", "elencone-windows.txt": "elencone-windows.txt", "elencone-linux-legacy.txt": "elencone-linux-legacy.txt"])
         bat(script: "python download.py ${env.TAG_NAME}")
         bat(script: "call conda index ${env.TAG_NAME}")
       }
@@ -68,31 +73,19 @@ pipeline {
       }
       steps {
         bat(script: "python distrocheck.py ${env.TAG_NAME}")
-      }
-    }
-
-    stage('Packages Downloading and Indexing - Legacy') {
-      when {
-        buildingTag()
-      }
-      steps {
-        unarchive(mapping: ["elencone-linux-legacy.txt": "elencone-linux-legacy.txt"])
-        bat(script: "python download.py ${env.TAG_NAME}-legacy elencone-linux-legacy.txt")
-        bat(script: "call conda index ${env.TAG_NAME}-legacy")
-      }
-    }
-    stage('Checking Distribution - Legacy') {
-      when {
-        buildingTag()
-      }
-      steps {
-        bat(script: "python distrocheck.py ${env.TAG_NAME}-legacy")
+        archiveArtifacts artifacts: "${env.TAG_NAME}/*/*.json"
       }
     }
 
     stage ('Distribution publish confirm') {
+      when {
+        allOf {
+          buildingTag()
+          expression { return params.ASK_PUB_CONFIRM }
+        }
+      }
       steps {
-        timeout(time: 1, unit: “HOURS”) {
+        timeout(time: 24, unit: "HOURS") {
           input(message: "Ready to publish the distributions?", ok: "OK, publish now!")
         }
       }
@@ -111,31 +104,13 @@ pipeline {
         buildingTag()
       }
       steps {
-        bat(script: "conda install pytho ratingpro serversoa -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
+        bat(script: "conda install pytho ratingpro serversoa " + readFile("windows.txt") + " -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
         node('linux') {
-          sh(script: "conda install pytho ratingpro serversoa -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
+          unarchive(mapping: ["components.txt": "components.txt", "linux.txt": "linux.txt", "linux-legacy.txt": "linux-legacy.txt"])
+          sh(script: "conda install " + readFile("components.txt") + " -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
         }
       }
     }
-    stage('Publishing Distribution - Legacy') {
-      when {
-        buildingTag()
-      }
-      steps {
-        bat(script: "(robocopy /MIR ${env.TAG_NAME}-legacy ${params.TARGET}\\${env.TAG_NAME}-legacy /XD ${env.TAG_NAME}-legacy\\linux-64\\.cache ${env.TAG_NAME}\\noarch\\.cache ) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
-      }
-    }
-    stage('Testing Distribution - Legacy') {
-      when {
-        buildingTag()
-      }
-      steps {
-        node('linux') {
-          sh(script: "conda install pytho ratingpro serversoa -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME}-legacy --override-channels --dry-run")
-        }
-      }
-    }
-
   }
   post {
     success {
