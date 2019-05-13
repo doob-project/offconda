@@ -11,7 +11,7 @@ pipeline {
     )
     string(
         name: 'LABEL',
-        defaultValue: env.TAG_NAME ? (env.TAG_NAME.contains('rc') ? 'release' : 'main') : env.BRANCH_NAME.split('/')[0].replace('hotfix', 'release').replace('master', 'main'),
+        defaultValue: env.TAG_NAME ? (env.TAG_NAME.contains('rc') ? 'release' : 'main') : env.BRANCH_NAME.split('/')[0].replace('master', 'main'),
         description: 'Source label'
     )
     string(
