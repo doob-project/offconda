@@ -16,7 +16,7 @@ pipeline {
     )
     string(
         name: 'TARGET',
-        defaultValue: 'C:\\CONDAOFFLINE',
+        defaultValue: 'Y:\\',
         description: 'Target offline repository'
     )
     booleanParam(
