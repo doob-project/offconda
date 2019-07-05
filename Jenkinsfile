@@ -76,7 +76,7 @@ pipeline {
         if (params.ALL_VARIANTS) {
           if (params.CROSS_ORIGINS) {
             bat(script: "python download.py -o ${env.TAG_NAME} --allvariants --crossorigins")
-          else {
+          } else {
             bat(script: "python download.py -o ${env.TAG_NAME} --allvariants")
           }
         } else {
