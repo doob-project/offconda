@@ -73,14 +73,16 @@ pipeline {
       }
       steps {
         unarchive(mapping: ["elencone-linux.txt": "elencone-linux.txt", "elencone-windows.txt": "elencone-windows.txt", "elencone-linux-legacy.txt": "elencone-linux-legacy.txt"])
-        if (params.ALL_VARIANTS) {
-          if (params.CROSS_ORIGINS) {
-            bat(script: "python download.py -o ${env.TAG_NAME} --allvariants --crossorigins")
+        script {
+          if (params.ALL_VARIANTS) {
+            if (params.CROSS_ORIGINS) {
+              bat(script: "python download.py -o ${env.TAG_NAME} --allvariants --crossorigins")
+            } else {
+              bat(script: "python download.py -o ${env.TAG_NAME} --allvariants")
+            }
           } else {
-            bat(script: "python download.py -o ${env.TAG_NAME} --allvariants")
+            bat(script: "python download.py -o ${env.TAG_NAME}")
           }
-        } else {
-          bat(script: "python download.py -o ${env.TAG_NAME}")
         }
         bat(script: "call conda index ${env.TAG_NAME}")
       }
