@@ -24,6 +24,16 @@ pipeline {
         defaultValue: true,
         description: "Wait for confirm before publishing"
     )
+    booleanParam(
+        name: 'ALL_VARIANTS',
+        defaultValue: true,
+        description: "Search for all packages variants"
+    )
+    booleanParam(
+        name: 'CROSS_ORIGINS',
+        defaultValue: false,
+        description: "Search variants accross origins"
+    )
   }
   environment {
     CONDAENV = "${env.JOB_NAME}_${env.BUILD_NUMBER}".replace('%2F','_').replace('/', '_')
@@ -63,7 +73,15 @@ pipeline {
       }
       steps {
         unarchive(mapping: ["elencone-linux.txt": "elencone-linux.txt", "elencone-windows.txt": "elencone-windows.txt", "elencone-linux-legacy.txt": "elencone-linux-legacy.txt"])
-        bat(script: "python download.py ${env.TAG_NAME}")
+        if (params.ALL_VARIANTS) {
+          if (params.CROSS_ORIGINS) {
+            bat(script: "python download.py -o ${env.TAG_NAME} --allvariants --crossorigins")
+          else {
+            bat(script: "python download.py -o ${env.TAG_NAME} --allvariants")
+          }
+        } else {
+          bat(script: "python download.py -o ${env.TAG_NAME}")
+        }
         bat(script: "call conda index ${env.TAG_NAME}")
       }
     }
