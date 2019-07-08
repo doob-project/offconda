@@ -1,7 +1,7 @@
 from __future__ import print_function
 import os, sys, time, re, json
 from tempfile import mkdtemp
-from packaging import version
+from packaging.version import Version, LegacyVersion, InvalidVersion
 try:
     from urllib.request import urlopen  # Python 3
     from urllib.parse import urlparse
@@ -17,7 +17,22 @@ def splitcondaname(cname):
     variant = xx.pop().split('.')[0]
     ver = xx.pop()
     base = '-'.join(xx)
-    return base, version.parse(ver), variant
+    try:
+        pver = Version(ver)
+    except InvalidVersion:
+        tver = LegacyVersion(ver)
+        pp = []
+        for v in tver._key[1]:
+            try:
+                pp.append(str(int(v)))
+            except ValueError:
+                break
+        pver = Version('.'.join(pp)) if pp else tver
+        print("WARNING: Pack {} LegacyVersion {} resolved as {}".format(cname, ver, pver))
+    except Exception:
+        print("FAILED version parsing!")
+        raise
+    return base, pver, variant
 
 
 def find_all_packages(platform):
