@@ -115,7 +115,8 @@ def list_packages(elencone='', where=".", allvariants=False, acceptallorigins=Fa
                         pname = pp.pop()
                         arch = pp.pop()
                         archvar = allv[arch]
-                        assert acceptallorigins or pname in archvar
+                        if not (acceptallorigins or pname in archvar):
+                            print("WARNING: Package {} not in base distribution but instead {}".format(pname, url))
                         base, ver, pyver = splitcondaname(pname)[0:3]
                         for candidate in archvar:
                             if candidate == pname:
