@@ -32,7 +32,12 @@ def splitcondaname(cname):
     except Exception:
         print("FAILED version parsing!")
         raise
-    return base, pver, variant
+    if re.match('py\d\d_', variant):
+        pyver, hashvar = variant.split('_', 1)
+    else:
+        pyver = None
+        hashvar = variant
+    return base, pver, pyver, hashvar
 
 
 def find_all_packages(platform):
@@ -111,12 +116,12 @@ def list_packages(elencone='', where=".", allvariants=False, acceptallorigins=Fa
                         arch = pp.pop()
                         archvar = allv[arch]
                         assert acceptallorigins or pname in archvar
-                        base, ver = splitcondaname(pname)[0:2]
+                        base, ver, pyver = splitcondaname(pname)[0:3]
                         for candidate in archvar:
                             if candidate == pname:
                                 continue
-                            bc, bver = splitcondaname(candidate)[0:2]
-                            if bc != base or ver.base_version != bver.base_version:
+                            bc, bver, bpyver = splitcondaname(candidate)[0:3]
+                            if bc != base or ver.base_version != bver.base_version or pyver != bpyver:
                                 continue
                             dwnurl = '/'.join([MAINCONDAREPO, arch, candidate])
                             downloadus.add(dwnurl)
