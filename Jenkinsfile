@@ -74,6 +74,12 @@ pipeline {
       steps {
         unarchive(mapping: ["elencone-linux.txt": "elencone-linux.txt", "elencone-windows.txt": "elencone-windows.txt", "elencone-linux-legacy.txt": "elencone-linux-legacy.txt"])
         script {
+          try {
+            bat(script: "del ${env.TAG_NAME}\\*.* /S /Q")
+            bat(script: "RMDIR ${env.TAG_NAME} /S")
+          } catch (err) {
+            echo err.getMessage()
+          }
           if (params.ALL_VARIANTS) {
             if (params.CROSS_ORIGINS) {
               bat(script: "python download.py -o ${env.TAG_NAME} --allvariants --crossorigins")

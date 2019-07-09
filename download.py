@@ -32,8 +32,9 @@ def splitcondaname(cname):
     except Exception:
         print("FAILED version parsing!")
         raise
-    if re.match('py\d\d_', variant):
-        pyver, hashvar = variant.split('_', 1)
+    if re.match('py\d\d\.*', variant):
+        pyver = variant[:4]
+        hashvar = variant[4:]
     else:
         pyver = None
         hashvar = variant
