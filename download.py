@@ -101,6 +101,8 @@ def list_packages(elencone='', where=".", allvariants=False, acceptallorigins=Fa
     if allvariants:
         for k in ('linux-64', 'win-64', 'noarch'):
             allv[k] = find_all_packages(k)
+    with open("flawedpackges.json") as flawedfile:
+        flawed = json.load(flawedfile)
     downloadus = set()
     for listfile in os.listdir(where):
         if elencone and listfile == elencone or not elencone and listfile.startswith('elencone-'):
@@ -121,6 +123,9 @@ def list_packages(elencone='', where=".", allvariants=False, acceptallorigins=Fa
                         base, ver, pyver = splitcondaname(pname)[0:3]
                         for candidate in archvar:
                             if candidate == pname:
+                                continue
+                            if candidate in flawed.get(arch, []):
+                                print("INFO: Skipping flawed package {}".format(candidate))
                                 continue
                             bc, bver, bpyver = splitcondaname(candidate)[0:3]
                             if bc != base or ver.base_version != bver.base_version or pyver != bpyver:
