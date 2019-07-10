@@ -16,13 +16,23 @@ pipeline {
     )
     string(
         name: 'TARGET',
-        defaultValue: 'Y:\\',
+        defaultValue: 'C:\\OFFCONDA',
         description: 'Target offline repository'
     )
     booleanParam(
         name: 'ASK_PUB_CONFIRM',
         defaultValue: true,
         description: "Wait for confirm before publishing"
+    )
+    booleanParam(
+        name: 'ALL_VARIANTS',
+        defaultValue: true,
+        description: "Search for all packages variants"
+    )
+    booleanParam(
+        name: 'CROSS_ORIGINS',
+        defaultValue: false,
+        description: "Search variants accross origins"
     )
   }
   environment {
@@ -63,7 +73,23 @@ pipeline {
       }
       steps {
         unarchive(mapping: ["elencone-linux.txt": "elencone-linux.txt", "elencone-windows.txt": "elencone-windows.txt", "elencone-linux-legacy.txt": "elencone-linux-legacy.txt"])
-        bat(script: "python download.py ${env.TAG_NAME}")
+        script {
+          try {
+            bat(script: "del ${env.TAG_NAME}\\*.* /S /Q")
+            bat(script: "RMDIR ${env.TAG_NAME} /S")
+          } catch (err) {
+            echo err.getMessage()
+          }
+          if (params.ALL_VARIANTS) {
+            if (params.CROSS_ORIGINS) {
+              bat(script: "python download.py -o ${env.TAG_NAME} --allvariants --crossorigins")
+            } else {
+              bat(script: "python download.py -o ${env.TAG_NAME} --allvariants")
+            }
+          } else {
+            bat(script: "python download.py -o ${env.TAG_NAME}")
+          }
+        }
         bat(script: "call conda index ${env.TAG_NAME}")
       }
     }
@@ -104,10 +130,10 @@ pipeline {
         buildingTag()
       }
       steps {
-        bat(script: "conda install pytho ratingpro serversoa " + readFile("windows.txt") + " -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
+        bat(script: "conda install pytho ratingpro " + readFile("windows.txt") + " -c {$env.DELIVERY_URL}/${env.TAG_NAME} --override-channels --dry-run")
         node('linux') {
           unarchive(mapping: ["components.txt": "components.txt", "linux.txt": "linux.txt", "linux-legacy.txt": "linux-legacy.txt"])
-          sh(script: "conda install " + readFile("components.txt") + " -c http://daa-ws-01:9200/.condaoffline/${env.TAG_NAME} --override-channels --dry-run")
+          sh(script: "conda install " + readFile("components.txt") + " -c {$env.DELIVERY_URL}/${env.TAG_NAME} --override-channels --dry-run")
         }
       }
     }
