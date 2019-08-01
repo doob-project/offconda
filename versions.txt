@@ -1,1 +1,1 @@
-pytho=4.8 gsf=4.8 ratingpro=4.0 pytho_docs=4.8 serversoa=1.2 conda=4.6 conda-env=2 mtools=1
+pytho=4.8 gsf=4.8 ratingpro=3.8 pytho_docs=4.8 serversoa=1.2 conda=4.6 conda-env=2 mtools=1

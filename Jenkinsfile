@@ -16,7 +16,7 @@ pipeline {
     )
     string(
         name: 'TARGET',
-        defaultValue: 'C:\\OFFCONDA',
+        defaultValue: 'Y:',
         description: 'Target offline repository'
     )
     booleanParam(
@@ -130,10 +130,10 @@ pipeline {
         buildingTag()
       }
       steps {
-        bat(script: "conda install pytho ratingpro " + readFile("windows.txt") + " -c {$env.DELIVERY_URL}/${env.TAG_NAME} --override-channels --dry-run")
+        bat(script: "conda install pytho ratingpro " + readFile("windows.txt") + " --offline -c ${params.TARGET}\\${env.TAG_NAME} --override-channels --dry-run")
         node('linux') {
-          unarchive(mapping: ["components.txt": "components.txt", "linux.txt": "linux.txt", "linux-legacy.txt": "linux-legacy.txt"])
-          sh(script: "conda install " + readFile("components.txt") + " -c {$env.DELIVERY_URL}/${env.TAG_NAME} --override-channels --dry-run")
+          unarchive(mapping: ["components.txt": "components.txt", "linux.txt": "linux.txt"])
+          sh(script: "conda install " + readFile("components.txt") + " " + + readFile("linux.txt") + " -c ${env.DELIVERY_URL}/${env.TAG_NAME} --override-channels --dry-run")
         }
       }
     }
