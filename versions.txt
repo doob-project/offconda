@@ -1,1 +1,1 @@
-pytho=4.10.0rc8 gsf=4.10.0rc4 ratingpro=4.1.1rc3 pytho_docs=4.10.0rc1 conda=4.6 conda-env=2 mtools=1
+pytho=4.10.0 gsf=4.10.0 ratingpro=4.1.1 pytho_docs=4.10.0 conda=4.6 conda-env=2 mtools=1
