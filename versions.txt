@@ -1,1 +1,1 @@
-pytho=4.11.* gsf=4.11.* ratingpro=4.1.* pytho_docs=4.11.* conda=4.6 conda-env=2
+pytho=4.10.2 gsf=4.10.3 ratingpro=4.1.1 pytho_docs=4.10.1 conda=4.6 conda-env=2
