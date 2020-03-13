@@ -1,1 +1,1 @@
-pytho=4.12.0rc* gsf=4.12.0rc* ratingpro=4.1.3rc* pytho_docs=4.12.0rc* wsgidavpythodc=0.1.0rc* conda=4.8 conda-env=2 python=2.7.17
+pytho=4.12.0rc* gsf=4.12.0rc* ratingpro=4.1.3rc* pytho_docs=4.12.0rc* wsgidavpythodc=0.1.0 conda=4.8 conda-env=2 python=2.7.17 cx_Oracle=7.3
