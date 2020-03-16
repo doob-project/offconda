@@ -9,7 +9,7 @@ def call(envlabel, sourcelabel, components, condaenvb="base") {
       stage('Generating packages list') {
         condaShellCmd("conda create -y -n ${CONDAENV}-${envlabel} python=2.7", condaenvb)
         retry(3) {
-            condaShellCmd("conda install --copy -q -c t/${env.ANACONDA_API_TOKEN}/prometeia/channel/${sourcelabel} -c t/${env.ANACONDA_API_TOKEN}/prometeia -c defaults --override-channels --no-channel-priority -y ${components}", "${CONDAENV}-${envlabel}")
+            condaShellCmd("conda install --copy -q -c t/${env.ANACONDA_API_TOKEN}/prometeia/channel/${sourcelabel} -c t/${env.ANACONDA_API_TOKEN}/prometeia -c defaults -c main -f free --override-channels --no-channel-priority -y ${components}", "${CONDAENV}-${envlabel}")
         }
         script {
           writeFile file: "elencone-${envlabel}.txt", text: condaShellCmd("conda list --explicit", "${CONDAENV}-${envlabel}", true).trim()

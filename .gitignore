@@ -107,3 +107,4 @@ venv.bak/
 tmp/
 elencone-*.txt
 .idea
+*-cache.json
