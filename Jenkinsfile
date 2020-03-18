@@ -1,4 +1,4 @@
-@Library(['promebuilder', 'offconda'])_
+@Library(['promebuilder', 'offconda@release/04.12'])_
 
 
 pipeline {
