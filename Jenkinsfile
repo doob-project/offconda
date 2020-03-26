@@ -51,17 +51,17 @@ pipeline {
       parallel {
         stage("Target Linux") {
           steps {
-            doublePackager('linux', params.LABEL, readFile("components.txt") + " " + readFile("linux.txt"))
+            doublePackager('linux', params.LABEL, readFile("components.txt") + " " + readFile("linux.txt"), 'anaconda')
           }
         }
         stage("Target Linux Legacy") {
           steps {
-             doublePackager('linux-legacy', params.LABEL, readFile("components.txt") + " " + readFile("linux-legacy.txt"))
+             doublePackager('linux-legacy', params.LABEL, readFile("components.txt") + " " + readFile("linux-legacy.txt"), 'anaconda')
           }
         }
         stage("Target Windows") {
           steps {
-            doublePackager('windows', params.LABEL, readFile("components.txt") + " " + readFile("windows.txt"))
+            doublePackager('windows', params.LABEL, readFile("components.txt") + " " + readFile("windows.txt"), 'anaconda')
           }
         }
       }
