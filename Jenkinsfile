@@ -1,4 +1,4 @@
-@Library(['promebuilder', 'offconda@master'])_
+@Library(['promebuilder', 'offconda'])_
 
 
 pipeline {
