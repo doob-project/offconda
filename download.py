@@ -73,7 +73,7 @@ def get_large_file(url, fname, length=64*1024, retries=5, overwrite=False):
         try:
             print("- Try %d: " % (tnum+1), end='')
             req = urlopen(url)
-            size = long(req.headers['content-length'])
+            size = long(req.headers.get('content-length', -1))
             if not overwrite and os.path.exists(fname) and os.stat(fname).st_size == size:
                 print("Skipping becuase existing with size {} B".format(size))
                 return
