@@ -2,7 +2,7 @@
 
 
 pipeline {
-  agent any
+  agent { node { label 'windows' } } 
   parameters {
     string(
         name: 'COMPONENTS',
@@ -122,9 +122,7 @@ pipeline {
         buildingTag()
       }
       steps {
-        node('windows') {
-          bat(script: "(robocopy /MIR ${env.TAG_NAME} ${params.TARGET}\\${env.TAG_NAME} /XD ${env.TAG_NAME}\\win-64\\.cache ${env.TAG_NAME}\\linux-64\\.cache ${env.TAG_NAME}\\noarch\\.cache ) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
-        }
+        bat(script: "(robocopy /MIR ${env.TAG_NAME} ${params.TARGET}\\${env.TAG_NAME} /XD ${env.TAG_NAME}\\win-64\\.cache ${env.TAG_NAME}\\linux-64\\.cache ${env.TAG_NAME}\\noarch\\.cache ) ^& IF %ERRORLEVEL% LEQ 1 exit 0")
       }
     }
     stage('Testing Distribution') {
