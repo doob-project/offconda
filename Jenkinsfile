@@ -2,7 +2,7 @@
 
 
 pipeline {
-  agent any
+  agent { node { label 'windows' } } 
   parameters {
     string(
         name: 'COMPONENTS',
@@ -145,12 +145,8 @@ pipeline {
     }
   }
   post {
-    success {
-      slackSend color: "good", message: "Successed ${env.JOB_NAME} (<${env.BUILD_URL}|Open>)"
+    always {
       deleteDir()
-    }
-    failure {
-      slackSend color: "warning", message: "Failed ${env.JOB_NAME} (<${env.BUILD_URL}|Open>)"
     }
   }
 }
