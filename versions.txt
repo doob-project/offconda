@@ -1,1 +1,1 @@
-pytho=4.15.1 gsf=4.15.1 ratingpro=4.2.2 pytho_docs=4.15.1 wsgidavpythodc=0.1.1 conda=4.8 conda-env=2 python=2.7.* cx_Oracle=7.3 psycopg2=2.8 py3_ecap=0.2.0
+pytho=4.16.* gsf=4.16.* pytho_docs=4.16.* wsgidavpythodc=0.1.1 conda=4.8 conda-env=2 python=2.7.* cx_Oracle=7.3 psycopg2=2.8 py3_ecap=0.2.0 pycountry=18.* parso=0.7.*
