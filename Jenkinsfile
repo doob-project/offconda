@@ -2,7 +2,7 @@
 
 
 pipeline {
-  agent { node { label 'windows' } } 
+  agent { node { label 'offconda' } } 
   parameters {
     string(
         name: 'COMPONENTS',
