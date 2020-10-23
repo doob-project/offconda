@@ -2,7 +2,7 @@
 
 
 pipeline {
-  agent { node { label 'windows' } } 
+  agent { node { label 'offconda' } } 
   parameters {
     string(
         name: 'COMPONENTS',
@@ -130,7 +130,7 @@ pipeline {
         buildingTag()
       }
       steps {
-        bat(script: "conda install pytho ratingpro " + readFile("windows.txt") + " --offline -c ${params.TARGET}\\${env.TAG_NAME} --override-channels --dry-run")
+        bat(script: "conda install pytho" + readFile("windows.txt") + " --offline -c ${params.TARGET}\\${env.TAG_NAME} --override-channels --dry-run")
         script {
           try {
             node('linux') {
