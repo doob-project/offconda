@@ -61,7 +61,7 @@ pipeline {
         }
         stage("Target Windows") {
           steps {
-            doublePackager('windows', params.LABEL,  readFile("windows.txt") + " " + readFile("components.txt"))
+            doublePackager('windows', params.LABEL, readFile("windows.txt") + " " + readFile("components.txt"))
           }
         }
       }
