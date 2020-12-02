@@ -2,7 +2,7 @@
 
 
 pipeline {
-  agent { node { label 'offconda' } } 
+  agent { node { label 'offconda' } }
   parameters {
     string(
         name: 'COMPONENTS',
@@ -51,17 +51,17 @@ pipeline {
       parallel {
         stage("Target Linux") {
           steps {
-            doublePackager('linux', params.LABEL, readFile("components.txt") + " " + readFile("linux.txt"))
+            doublePackager('linux', params.LABEL, readFile("linux.txt") + " " + readFile("components.txt"))
           }
         }
         stage("Target Linux Legacy") {
           steps {
-             doublePackager('linux-legacy', params.LABEL, readFile("components.txt") + " " + readFile("linux-legacy.txt"))
+             doublePackager('linux-legacy', params.LABEL, readFile("linux-legacy.txt") + " " + readFile("components.txt"))
           }
         }
         stage("Target Windows") {
           steps {
-            doublePackager('windows', params.LABEL, readFile("components.txt") + " " + readFile("windows.txt"))
+            doublePackager('windows', params.LABEL, readFile("windows.txt") + " " + readFile("components.txt"))
           }
         }
       }
