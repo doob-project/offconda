@@ -89,8 +89,14 @@ pipeline {
           } else {
             bat(script: "python download.py -o ${env.TAG_NAME}")
           }
+          echo("Indexing distribution")
+          try {
+            bat(script: "call conda index ${env.TAG_NAME}")
+          } catch (err) {
+            echo err.getMessage()
+            bat(script: "move ${env.TAG_NAME} c:\\tmp")
+          }
         }
-        bat(script: "call conda index ${env.TAG_NAME}")
       }
     }
     stage('Checking Distribution') {
