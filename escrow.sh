@@ -10,6 +10,7 @@ escrow() {
         SUBPATH=$PROD
     fi
     cd $PROD
+    git checkout master
     local VER="$(getversion)"    
     git fetch
     local FNAME="$PROD-$VER.zip"
@@ -22,5 +23,6 @@ escrow() {
 
 escrow "pytho"
 escrow "gsf" "commonlib/gsf"
-escrow "ratingpro"
+#escrow "ratingpro"
 escrow "pkgateway"
+escrow "simviewer"
