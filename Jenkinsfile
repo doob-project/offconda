@@ -94,6 +94,7 @@ pipeline {
             bat(script: "call conda index ${env.TAG_NAME}")
           } catch (err) {
             echo err.getMessage()
+            bat(script: "move ${env.TAG_NAME} c:\\tmp")
           }
         }
       }
