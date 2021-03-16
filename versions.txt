@@ -1,1 +1,1 @@
-pytho=4.18.2 gsf=4.18.2 pytho_docs=4.18.0 wsgidavpythodc=0.1.1 conda=4.8 conda-env=2 python=2.7 cx_Oracle=7.3 psycopg2=2.8 py3_ecap=0.2.0 pycountry=18 parso=0.7 carige_analytics_adb=0.1.3
+pytho=4.18.2 gsf=4.18.2 pytho_docs=4.18.0 wsgidavpythodc=0.1.1 conda=4.8 conda-env=2 python=2.7 cx_Oracle=7.3 psycopg2=2.8 py3_ecap=0.2.0 pycountry=18 parso=0.7 carige_analytics_adb=0.1.4
