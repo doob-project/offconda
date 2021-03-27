@@ -1,0 +1,1 @@
+blosc==1.14.3 snappy==1.1.7 python=2.7.18

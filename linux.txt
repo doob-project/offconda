@@ -1,1 +1,1 @@
-supervisor icu>=58 libgcc-ng libstdcxx-ng librabbitmq=1.6 jupyterlab
+supervisor icu>=58 libgcc-ng libstdcxx-ng librabbitmq=1.6 jupyterlab python=2.7.18
