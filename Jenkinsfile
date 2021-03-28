@@ -136,7 +136,7 @@ pipeline {
         buildingTag()
       }
       steps {
-        bat(script: "conda install pytho" + readFile("windows.txt") + " --offline -c ${params.TARGET}\\${env.TAG_NAME} --override-channels --dry-run")
+        bat(script: "conda install pytho " + readFile("windows.txt") + " --offline -c ${params.TARGET}\\${env.TAG_NAME} --override-channels --dry-run")
         script {
           try {
             node('linux') {
